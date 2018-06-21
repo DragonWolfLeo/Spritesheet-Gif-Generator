@@ -7,14 +7,13 @@ const hasPngExtension = str => str.substr(str.length-4) === ".png";
 const removePngExtension = str => hasPngExtension(str) ? str.substr(0,str.length-4) : str;
 
 const convertToGif = (props, name) => {
-	const { directory, framewidth, framerate, transparentcolor } = props;
+	const { directory, framewidth, framerate, transparentcolor, quality } = props;
 	const path = `${directory}/${name}.png`;
     fs.exists(path,exists=>{
         if(!exists){
             console.log("Could not open file " + path);
             return
         } 
-        console.log("Converting " + path);
     	fs.createReadStream(path)
         .pipe(new PNG())
         .on('parsed', function(){
@@ -58,6 +57,7 @@ const convertToGif = (props, name) => {
         	gif.setRepeat(0);
         	gif.setFrameRate(Number(framerate));
         	gif.setTransparent(Number("0x"+transparentcolor));
+            gif.setQuality(Number(quality));
 
         	// Start writing gif
         	gif.pipe(file);
@@ -76,6 +76,7 @@ const convertToGif = (props, name) => {
         		gif.addFrame(pixels);
         	}
         	gif.finish();
+            console.log("Converted " + path);
         });
     });
         
@@ -103,29 +104,35 @@ const questions = [
         name : 'directory',
         default : "",
         filter: dir => dir ? dir : ".",
-        message : 'Enter folder directory...'
+        message : 'Enter folder directory:'
     },
     {
         type : 'input',
         name : 'name',
-        message : 'Enter name (no extension). Leave blank to convert all...'
+        message : 'Enter name (no extension). Leave blank to convert all:'
     },
     {
         type : 'input',
         name : 'framerate',
         default : 30,
-        message : 'Enter frame frames per second...'
+        message : 'Enter frame frames per second:'
     },
     {
         type : 'input',
         name : 'framewidth',
-        message : 'Enter frame width. Leave blank for auto...'
+        message : 'Enter frame width. Leave blank for auto:'
     },
     {
         type : 'input',
         name : 'transparentcolor',
         default : "0000FF",
-        message : 'Enter transparent color in hex...'
+        message : 'Enter transparent color in hex:'
+    },
+    {
+        type : 'input',
+        name : 'quality',
+        default : 10,
+        message : 'Enter quality (1 = best; 20 = worst):'
     },
     {
         type : 'confirm',
